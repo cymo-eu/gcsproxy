@@ -1,7 +1,11 @@
-FROM alpine:3.7
-ENV GCSPROXY_VERSION=0.3.0
-RUN apk add --update ca-certificates
-RUN apk add --no-cache --virtual .build-deps ca-certificates wget \
-  && wget https://github.com/daichirata/gcsproxy/releases/download/v${GCSPROXY_VERSION}/gcsproxy_${GCSPROXY_VERSION}_amd64_linux -O /usr/local/bin/gcsproxy \
-  && chmod +x /usr/local/bin/gcsproxy \
-  && apk del .build-deps
+FROM golang:latest as builder
+WORKDIR /app
+COPY . /app
+RUN CGO_ENABLED=0 GOOS=linux GOPROXY=https://proxy.golang.org go build -o app ./main.go
+FROM alpine:latest
+# mailcap adds mime detection and ca-certificates help with TLS (basic stuff)
+RUN addgroup -S app && adduser -S app -G app
+USER app
+WORKDIR /app
+COPY --from=builder /app/app .
+ENTRYPOINT ["./app"]

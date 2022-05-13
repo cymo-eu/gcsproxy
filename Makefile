@@ -13,9 +13,6 @@ build-cross: $(GOFILES_NOVENDOR)
 	GOOS=linux  GOARCH=amd64 go build -o dist/$(BIN_NAME)_$(VERSION)_amd64_linux
 	GOOS=darwin GOARCH=amd64 go build -o dist/$(BIN_NAME)_$(VERSION)_amd64_darwin
 
-deps:
-	glide install
-
 fmt:
 	gofmt -l -w $(GOFILES_NOVENDOR)
 
